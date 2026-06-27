@@ -49,3 +49,14 @@ The stack is Django, Django REST Framework, Celery, Redis, PostgreSQL with pgvec
 - Document chat with citation
 - Export card/history
 - Evaluation report
+
+## Captured Screenshots
+
+Use these repo assets in the README, GitHub project page, LinkedIn carousel, or walkthrough:
+
+- `docs/assets/login.png` - secure sign-in entry point.
+- `docs/assets/dashboard.png` - workspace metrics and document workflow.
+- `docs/assets/document-library.png` - uploaded document library.
+- `docs/assets/document-detail.png` - preview, extraction, review, and exports.
+- `docs/assets/document-chat.png` - grounded answer with citation.
+- `docs/assets/evaluation-report.png` - extraction quality report.

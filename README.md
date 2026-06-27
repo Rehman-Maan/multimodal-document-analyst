@@ -14,6 +14,38 @@ Recording script and storyboard are ready:
 - [LinkedIn caption](docs/video/linkedin_post_caption.md)
 - [Storyboard](docs/video/storyboard.md)
 
+## Screenshots
+
+### Workspace Dashboard
+
+The workspace command center shows document volume, review status, approval progress, and the end-to-end document workflow.
+
+![Workspace dashboard](docs/assets/dashboard.png)
+
+### Document Library
+
+The library gives analysts a workspace-scoped view of uploaded files, processing state, document type, owner, and workflow entry points.
+
+![Document library](docs/assets/document-library.png)
+
+### Document Detail
+
+The document detail screen combines the original file, extracted page text, schema-based structured fields, review state, exports, and processing timeline.
+
+![Document detail](docs/assets/document-detail.png)
+
+### Cited Document Chat
+
+The chat view answers questions against indexed document text and attaches focused citations to the evidence used.
+
+![Cited document chat](docs/assets/document-chat.png)
+
+### Evaluation Report
+
+Evaluation reports score extraction quality against synthetic gold datasets so the AI workflow is measurable, not only demoable.
+
+![Evaluation report](docs/assets/evaluation-report.png)
+
 ## Key Features
 
 - Django backend with Django REST Framework
