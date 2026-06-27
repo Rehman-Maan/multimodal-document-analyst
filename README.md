@@ -13,7 +13,6 @@ Recording script and storyboard are ready:
 - [Demo script](docs/demo_script.md)
 - [LinkedIn caption](docs/video/linkedin_post_caption.md)
 - [Storyboard](docs/video/storyboard.md)
-- [Technical interview guide](docs/technical-interview-guide.md)
 
 ## Screenshots
 
