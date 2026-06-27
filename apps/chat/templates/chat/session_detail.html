@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+
+{% block title %}Document Chat{% endblock %}
+
+{% block content %}
+<div class="page-shell">
+  <section class="page-header">
+    <div>
+      <p class="eyebrow">Cited document chat</p>
+      <h1>Ask this document</h1>
+      <p class="muted">{{ document.title }} - <span class="status-pill">{{ chunk_count }} indexed chunk{{ chunk_count|pluralize }}</span></p>
+    </div>
+    <div class="action-row">
+      <form method="post" action="{% url 'document-chat-reindex' workspace.slug document.pk %}">
+        {% csrf_token %}
+        <button type="submit">Reindex</button>
+      </form>
+      <a class="pill-link" href="{{ document.get_absolute_url }}">Document</a>
+    </div>
+  </section>
+
+  <div class="chat-layout">
+    <section class="surface">
+      <p class="eyebrow">Question</p>
+      <h2>Grounded answer</h2>
+      <p class="muted">Answers are retrieved from indexed page text and include citations when evidence is available.</p>
+      <form method="post" action="{% url 'document-chat-ask' workspace.slug document.pk %}" class="form-stack" id="chat-question-form">
+        {% csrf_token %}
+        <label>
+          Question
+          {{ form.question }}
+        </label>
+        <button type="submit">Ask question</button>
+      </form>
+    </section>
+
+    <section class="panel">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Conversation</p>
+          <h2>Evidence trail</h2>
+        </div>
+      </div>
+      {% if exchanges %}
+        <div class="conversation-stack" id="conversation-stack">
+          {% for exchange in exchanges %}
+            <div class="exchange-card">
+              {% if exchange.user %}
+                <article class="message-card user">
+                  <span class="badge">User</span>
+                  <p class="stack-top">{{ exchange.user.content }}</p>
+                </article>
+              {% endif %}
+              {% if exchange.assistant %}
+                <article class="message-card assistant">
+                  <span class="badge">Assistant</span>
+                  <p class="stack-top">{{ exchange.assistant.content }}</p>
+                  {% if exchange.assistant.citations %}
+                    <div class="citation-list">
+                      <strong>Citations</strong>
+                      <ul>
+                        {% for citation in exchange.assistant.citations %}
+                          <li>Page {{ citation.page_number|default:"-" }}: {{ citation.excerpt }}</li>
+                        {% endfor %}
+                      </ul>
+                    </div>
+                  {% endif %}
+                </article>
+              {% endif %}
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="empty-state" id="conversation-empty">
+          <span class="empty-icon">?</span>
+          <h3>No questions yet</h3>
+          <p class="muted">Ask a question to create a cited conversation.</p>
+        </div>
+        <div class="conversation-stack" id="conversation-stack"></div>
+      {% endif %}
+    </section>
+  </div>
+</div>
+<script>
+  (() => {
+    const form = document.getElementById("chat-question-form");
+    const stack = document.getElementById("conversation-stack");
+    const emptyState = document.getElementById("conversation-empty");
+    if (!form || !stack) return;
+
+    const textarea = form.querySelector("textarea");
+    const button = form.querySelector("button[type='submit']");
+    const csrfInput = form.querySelector("input[name='csrfmiddlewaretoken']");
+
+    function escapeHtml(value) {
+      return value
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function citationList(citations) {
+      if (!citations || !citations.length) return "";
+      const items = citations.map((citation) => {
+        const page = citation.page_number || "-";
+        return `<li>Page ${page}: ${escapeHtml(citation.excerpt || "")}</li>`;
+      }).join("");
+      return `<div class="citation-list"><strong>Citations</strong><ul>${items}</ul></div>`;
+    }
+
+    function exchangeHtml(question) {
+      return `
+        <div class="exchange-card pending">
+          <article class="message-card user">
+            <span class="badge">User</span>
+            <p class="stack-top">${escapeHtml(question)}</p>
+          </article>
+          <article class="message-card assistant">
+            <span class="badge">Assistant</span>
+            <p class="stack-top" aria-live="polite">
+              <span class="typing-dots" aria-label="Assistant is typing">
+                <span></span><span></span><span></span>
+              </span>
+            </p>
+          </article>
+        </div>
+      `;
+    }
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const question = textarea.value.trim();
+      if (!question) return;
+
+      const formData = new FormData(form);
+      if (emptyState) emptyState.remove();
+      stack.insertAdjacentHTML("afterbegin", exchangeHtml(question));
+      const pending = stack.querySelector(".exchange-card.pending");
+      textarea.value = "";
+      button.disabled = true;
+      button.textContent = "Asking...";
+
+      try {
+        const response = await fetch(form.action, {
+          method: "POST",
+          headers: {
+            "X-Requested-With": "XMLHttpRequest",
+            "X-CSRFToken": csrfInput.value,
+          },
+          body: formData,
+        });
+        if (!response.ok) throw new Error("Request failed");
+        const payload = await response.json();
+        pending.classList.remove("pending");
+        const assistant = pending.querySelector(".message-card.assistant");
+        assistant.innerHTML = `
+          <span class="badge">Assistant</span>
+          <p class="stack-top">${escapeHtml(payload.answer || "")}</p>
+          ${citationList(payload.citations)}
+        `;
+      } catch (error) {
+        const assistant = pending.querySelector(".message-card.assistant");
+        assistant.innerHTML = `
+          <span class="badge">Assistant</span>
+          <p class="stack-top">I could not complete that request. Please try again.</p>
+        `;
+      } finally {
+        button.disabled = false;
+        button.textContent = "Ask question";
+        textarea.focus();
+      }
+    });
+  })();
+</script>
+{% endblock %}

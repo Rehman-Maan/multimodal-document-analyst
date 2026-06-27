@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}{{ schema.name }}{% endblock %}
+
+{% block content %}
+<div class="page-shell">
+  <section class="page-header">
+    <div>
+      <p class="eyebrow">Extraction schema</p>
+      <h1>{{ schema.name }}</h1>
+      <p class="muted">{{ schema.document_type.name }} v{{ schema.version }}</p>
+    </div>
+    <div class="action-row">
+      <a class="pill-link" href="{% url 'schema-list' workspace.slug %}">Schema library</a>
+    </div>
+  </section>
+
+  <section class="split-layout">
+    <div class="surface">
+      <div class="section-heading">
+        <div>
+          <h2>Schema JSON</h2>
+          <p class="muted">The field contract used during structured document extraction.</p>
+        </div>
+        {% if schema.active %}
+          <span class="badge badge-ok">Active</span>
+        {% else %}
+          <span class="badge">Inactive</span>
+        {% endif %}
+      </div>
+      <pre class="code-block">{{ schema.schema_json }}</pre>
+    </div>
+    <aside class="surface">
+      <h2>Details</h2>
+      <div class="definition-list">
+        <div class="definition-row"><strong>Document type</strong><span class="muted">{{ schema.document_type.name }}</span></div>
+        <div class="definition-row"><strong>Version</strong><span class="muted">{{ schema.version }}</span></div>
+        <div class="definition-row"><strong>Status</strong><span class="muted">{% if schema.active %}Active{% else %}Inactive{% endif %}</span></div>
+      </div>
+    </aside>
+  </section>
+</div>
+{% endblock %}

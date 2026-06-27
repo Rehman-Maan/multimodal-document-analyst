@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}Schemas{% endblock %}
+
+{% block content %}
+<div class="page-shell">
+  <section class="page-header">
+    <div>
+      <p class="eyebrow">Extraction contract</p>
+      <h1>Extraction schemas</h1>
+      <p class="muted">{{ workspace.name }} - define document types and field rules for structured extraction.</p>
+    </div>
+    <div class="action-row">
+      <a class="button-link" href="{% url 'schema-create' workspace.slug %}">New schema</a>
+      <a class="pill-link" href="{% url 'schema-seed-defaults' workspace.slug %}">Add defaults</a>
+      <a class="pill-link" href="{% url 'document-type-create' workspace.slug %}">New document type</a>
+    </div>
+  </section>
+
+  <div class="split-layout">
+    <section class="panel">
+      <p class="eyebrow">Document types</p>
+      <h2>Classification targets</h2>
+      {% if document_types %}
+        <div class="definition-list">
+          {% for document_type in document_types %}
+            <div class="definition-row">
+              <span>{{ document_type.name }}</span>
+              {% if document_type.active %}
+                <strong class="badge badge-ok">Active</strong>
+              {% else %}
+                <strong class="badge">Inactive</strong>
+              {% endif %}
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="muted">No document types yet.</p>
+      {% endif %}
+    </section>
+
+    <section class="surface">
+      <p class="eyebrow">Schemas</p>
+      <h2>Field definitions</h2>
+      {% if schemas %}
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Document type</th>
+                <th>Version</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for schema in schemas %}
+                <tr>
+                  <td><a href="{{ schema.get_absolute_url }}">{{ schema.name }}</a></td>
+                  <td>{{ schema.document_type.name }}</td>
+                  <td>{{ schema.version }}</td>
+                  <td><span class="badge {% if schema.active %}badge-ok{% endif %}">{% if schema.active %}Active{% else %}Inactive{% endif %}</span></td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <p class="muted">No extraction schemas yet.</p>
+      {% endif %}
+    </section>
+  </div>
+</div>
+{% endblock %}

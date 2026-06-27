@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}Upload Document{% endblock %}
+
+{% block content %}
+<div class="page-shell">
+  <section class="page-header">
+    <div>
+      <p class="eyebrow">New document</p>
+      <h1>Upload document</h1>
+      <p class="muted">{{ workspace.name }} - validate the file, store it safely, and queue background processing.</p>
+    </div>
+    <a class="pill-link" href="{% url 'document-list' workspace.slug %}">Document library</a>
+  </section>
+
+  <section class="surface">
+    <form method="post" enctype="multipart/form-data" class="form-stack upload-dropzone">
+      {% csrf_token %}
+      {{ form.non_field_errors }}
+      <label>
+        Title
+        {{ form.title }}
+        {{ form.title.errors }}
+      </label>
+      <label>
+        Document type
+        {{ form.document_type }}
+        {{ form.document_type.errors }}
+      </label>
+      <label>
+        File
+        {{ form.file }}
+        {{ form.file.errors }}
+      </label>
+      <p class="muted">Accepted files: PDF, PNG, JPG, TIFF. Maximum size follows MAX_UPLOAD_MB.</p>
+      <button type="submit">Upload document</button>
+    </form>
+  </section>
+</div>
+{% endblock %}

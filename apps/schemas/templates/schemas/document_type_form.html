@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}New Document Type{% endblock %}
+
+{% block content %}
+<div class="page-shell">
+  <section class="page-header">
+    <div>
+      <p class="eyebrow">Schema setup</p>
+      <h1>New document type</h1>
+      <p class="muted">Create a category for related extraction schemas and document workflows.</p>
+    </div>
+    <div class="action-row">
+      <a class="pill-link" href="{% url 'schema-list' workspace.slug %}">Schema library</a>
+    </div>
+  </section>
+
+  <section class="split-layout">
+    <div class="surface">
+      <form method="post" class="form-stack">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Save document type</button>
+      </form>
+    </div>
+    <aside class="surface">
+      <p class="eyebrow">Examples</p>
+      <div class="definition-list">
+        <div class="definition-row"><strong>Invoice</strong><span class="muted">Billing fields</span></div>
+        <div class="definition-row"><strong>Contract</strong><span class="muted">Parties and clauses</span></div>
+        <div class="definition-row"><strong>Receipt</strong><span class="muted">Merchant and totals</span></div>
+      </div>
+    </aside>
+  </section>
+</div>
+{% endblock %}

@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block title %}Evaluation Report{% endblock %}
+
+{% block content %}
+<div class="page-shell">
+  <section class="page-header">
+    <div>
+      <p class="eyebrow">Evaluation report</p>
+      <h1>{{ evaluation_run.dataset_name }}</h1>
+      <p class="muted">{{ evaluation_run.total_items }} item{{ evaluation_run.total_items|pluralize }} scored - {{ workspace.name }}</p>
+    </div>
+    <a class="pill-link" href="{% url 'evaluation-list' workspace.slug %}">Evaluation reports</a>
+  </section>
+
+  <section class="metric-grid">
+    <article class="metric-card"><span class="metric-label">Field F1</span><strong class="metric-value">{{ evaluation_run.metrics.field_f1|floatformat:2 }}</strong><span class="metric-note">Balanced field quality</span></article>
+    <article class="metric-card"><span class="metric-label">Precision</span><strong class="metric-value">{{ evaluation_run.metrics.field_precision|floatformat:2 }}</strong><span class="metric-note">Correct predicted fields</span></article>
+    <article class="metric-card"><span class="metric-label">Recall</span><strong class="metric-value">{{ evaluation_run.metrics.field_recall|floatformat:2 }}</strong><span class="metric-note">Expected fields found</span></article>
+    <article class="metric-card"><span class="metric-label">Critical exact</span><strong class="metric-value">{{ evaluation_run.metrics.critical_field_exact_match|floatformat:2 }}</strong><span class="metric-note">Business-critical matches</span></article>
+  </section>
+
+  <div class="split-layout">
+    <section class="surface">
+      <p class="eyebrow">Metrics</p>
+      <h2>Quality summary</h2>
+      <div class="table-wrap">
+        <table>
+          <tbody>
+            {% for name, value in evaluation_run.metrics.items %}
+              <tr>
+                <th>{{ name }}</th>
+                <td>{{ value }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel">
+      <p class="eyebrow">Run metadata</p>
+      <h2>Snapshot</h2>
+      <div class="definition-list">
+        <div class="definition-row"><span>Dataset</span><strong>{{ evaluation_run.dataset_name }}</strong></div>
+        <div class="definition-row"><span>Items</span><strong>{{ evaluation_run.total_items }}</strong></div>
+        <div class="definition-row"><span>Created</span><strong>{{ evaluation_run.created_at|date:"Y-m-d H:i" }}</strong></div>
+      </div>
+    </section>
+  </div>
+
+  <section class="surface">
+    <p class="eyebrow">Item results</p>
+    <h2>Field-level evidence</h2>
+    <div class="conversation-stack">
+      {% for item in evaluation_run.item_results %}
+        <article class="page-card">
+          <strong>{{ item.id }}</strong>
+          <p class="muted">F1 {{ item.field_f1 }} - missing {{ item.missing_field_rate }}</p>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Field</th>
+                  <th>Expected</th>
+                  <th>Predicted</th>
+                  <th>Match</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for field in item.field_results %}
+                  <tr>
+                    <td>{{ field.field_name }}</td>
+                    <td>{{ field.expected }}</td>
+                    <td>{{ field.predicted|default:"-" }}</td>
+                    <td><span class="badge {% if field.exact_match %}badge-ok{% else %}badge-warn{% endif %}">{{ field.exact_match }}</span></td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </article>
+      {% endfor %}
+    </div>
+  </section>
+</div>
+{% endblock %}

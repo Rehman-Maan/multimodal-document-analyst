@@ -1,0 +1,14 @@
+.env
+.venv/
+__pycache__/
+*.py[cod]
+*.sqlite3
+test.sqlite3
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+staticfiles/
+media/*
+!media/.gitkeep
+*.log
+celerybeat-schedule*

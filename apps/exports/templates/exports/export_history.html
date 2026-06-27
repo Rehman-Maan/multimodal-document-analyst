@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}Export History{% endblock %}
+
+{% block content %}
+<div class="page-shell">
+  <section class="page-header">
+    <div>
+      <p class="eyebrow">Deliverables</p>
+      <h1>Export history</h1>
+      <p class="muted">{{ workspace.name }} - JSON and CSV files generated from reviewed structured data.</p>
+    </div>
+    <a class="pill-link" href="{% url 'workspace-dashboard' workspace.slug %}">Dashboard</a>
+  </section>
+
+  <section class="surface">
+    {% if exports %}
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Document</th>
+              <th>Format</th>
+              <th>Fields</th>
+              <th>Created by</th>
+              <th>Created</th>
+              <th>Download</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for export in exports %}
+              <tr>
+                <td><a href="{{ export.document.get_absolute_url }}">{{ export.document.title }}</a></td>
+                <td><span class="badge badge-ok">{{ export.get_format_display }}</span></td>
+                <td>{{ export.field_count }}</td>
+                <td>{{ export.created_by.username }}</td>
+                <td>{{ export.created_at|date:"Y-m-d H:i" }}</td>
+                <td><a href="{% url 'export-download' workspace.slug export.pk %}">Download</a></td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="empty-state">
+        <span class="empty-icon">↓</span>
+        <h2>No exports yet</h2>
+        <p class="muted">Create exports from a document detail page.</p>
+      </div>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

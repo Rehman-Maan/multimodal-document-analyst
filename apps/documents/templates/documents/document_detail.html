@@ -1,0 +1,279 @@
+{% extends "base.html" %}
+
+{% block title %}{{ document.title }}{% endblock %}
+
+{% block content %}
+<div class="page-shell">
+  <section class="page-header">
+    <div>
+      <p class="eyebrow">Document workspace</p>
+      <h1>{{ document.title }}</h1>
+      <p class="muted">{{ workspace.name }} - <span class="status-pill">{{ document.get_status_display }}</span></p>
+    </div>
+    <div class="action-row">
+      <form method="post" action="{% url 'document-process' workspace.slug document.pk %}">
+        {% csrf_token %}
+        <button type="submit">Process</button>
+      </form>
+      <a class="pill-link" href="{% url 'document-chat' workspace.slug document.pk %}">Chat</a>
+      {% if can_review %}
+        <a class="pill-link" href="{% url 'review-task-list' workspace.slug %}">Review queue</a>
+      {% endif %}
+      <a class="pill-link" href="{% url 'export-history' workspace.slug %}">Exports</a>
+      <a class="pill-link" href="{{ library_url }}">Library</a>
+    </div>
+  </section>
+
+  <section class="metric-grid" aria-label="Document metrics">
+    <article class="metric-card">
+      <span class="metric-label">File type</span>
+      <strong class="metric-value">{{ document.file_type }}</strong>
+      <span class="metric-note">Original upload format</span>
+    </article>
+    <article class="metric-card">
+      <span class="metric-label">Pages</span>
+      <strong class="metric-value">{{ document.page_count }}</strong>
+      <span class="metric-note">Processed page records</span>
+    </article>
+    <article class="metric-card">
+      <span class="metric-label">Size</span>
+      <strong class="metric-value">{{ document.file_size|filesizeformat }}</strong>
+      <span class="metric-note">Stored in media</span>
+    </article>
+    <article class="metric-card">
+      <span class="metric-label">Uploaded</span>
+      <strong class="metric-value">{{ document.created_at|date:"M d" }}</strong>
+      <span class="metric-note">{{ document.created_at|date:"Y H:i" }}</span>
+    </article>
+  </section>
+
+  <div class="document-layout">
+    <section class="surface">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Preview</p>
+          <h2>Pages and extracted text</h2>
+          {% if document.file %}
+            <p class="muted"><a href="{{ document.file.url }}">Open original file</a></p>
+          {% endif %}
+        </div>
+      </div>
+
+      {% if pages %}
+        <div class="grid">
+          {% for page in pages %}
+            <article class="page-card">
+              <strong>Page {{ page.page_number }}</strong>
+              {% if page.image %}
+                <p><a href="{{ page.image.url }}">Open rendered page</a></p>
+              {% endif %}
+              <p class="muted">{{ page.width }} x {{ page.height }}</p>
+              {% if page.text_content %}
+                <p>{{ page.text_content|truncatechars:260 }}</p>
+              {% else %}
+                <p class="muted">No extracted text yet.</p>
+              {% endif %}
+            </article>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="empty-state">
+          <span class="empty-icon">01</span>
+          <h3>No page records yet</h3>
+          <p class="muted">Processing creates rendered previews and extracted page text here.</p>
+        </div>
+      {% endif %}
+    </section>
+
+    <aside class="sidebar-stack">
+      <section class="panel">
+        <p class="eyebrow">Extraction</p>
+        <h2>Structured fields</h2>
+        {% if schemas %}
+          <form method="post" action="{% url 'document-extract' workspace.slug document.pk %}" class="form-stack">
+            {% csrf_token %}
+            <label>
+              Schema
+              <select name="schema_id" required>
+                {% for schema in schemas %}
+                  <option value="{{ schema.pk }}">{{ schema.document_type.name }} - {{ schema.name }} v{{ schema.version }}</option>
+                {% endfor %}
+              </select>
+            </label>
+            <button type="submit">Extract fields</button>
+          </form>
+        {% else %}
+          <p class="muted">No active schemas yet.</p>
+          <a class="pill-link" href="{% url 'schema-list' workspace.slug %}">Open schema library</a>
+        {% endif %}
+
+        {% if latest_run %}
+          <p class="muted card-title-gap">Latest run: {{ latest_run.get_status_display }} using {{ latest_run.schema.name }}</p>
+          {% if latest_run.validation_errors %}
+            <ul>
+              {% for error in latest_run.validation_errors %}
+                <li>{{ error }}</li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+        {% endif %}
+      </section>
+
+      <section class="panel">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Human review</p>
+            <h2>Validation</h2>
+            {% if open_review_tasks %}
+              <p class="muted">{{ open_review_tasks.count }} open task{{ open_review_tasks.count|pluralize }}</p>
+            {% else %}
+              <p class="muted">No open review tasks.</p>
+            {% endif %}
+          </div>
+        </div>
+        {% if can_review %}
+          <form method="post" action="{% url 'document-approve' workspace.slug document.pk %}">
+            {% csrf_token %}
+            <button type="submit">Approve document</button>
+          </form>
+        {% endif %}
+      </section>
+    </aside>
+  </div>
+
+  {% if extracted_fields %}
+    <section class="surface">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Extracted data</p>
+          <h2>Reviewed field values</h2>
+          <p class="muted">Normalized values below are used by JSON and CSV exports.</p>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Field</th>
+              <th>Value</th>
+              <th>Confidence</th>
+              <th>Source</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for field in extracted_fields %}
+              <tr>
+                <td>{{ field.field_name }}</td>
+                <td><span class="field-value">{{ field.normalized_value|default:"-" }}</span></td>
+                <td><span class="badge {% if field.confidence >= 0.9 %}badge-ok{% elif field.confidence < 0.6 %}badge-warn{% endif %}">{{ field.confidence|floatformat:2 }}</span></td>
+                <td>
+                  {% if field.source_page %}Page {{ field.source_page }}{% endif %}
+                  {% if field.source_text %}<span class="muted source-snippet">{{ field.source_text|truncatechars:90 }}</span>{% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  {% endif %}
+
+  <div class="split-layout">
+    <section class="panel">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Review trail</p>
+          <h2>Tasks</h2>
+        </div>
+      </div>
+      {% if review_tasks %}
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Field</th>
+                <th>Status</th>
+                <th>Priority</th>
+                <th>Reason</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for task in review_tasks %}
+                <tr>
+                  <td>
+                    <a href="{% url 'review-task-detail' workspace.slug task.pk %}">
+                      {% if task.field %}{{ task.field.field_name }}{% else %}Document{% endif %}
+                    </a>
+                  </td>
+                  <td><span class="badge badge-ok">{{ task.get_status_display }}</span></td>
+                  <td>{{ task.get_priority_display }}</td>
+                  <td>{{ task.reason|truncatechars:100 }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <p class="muted">No review tasks created yet.</p>
+      {% endif %}
+    </section>
+
+    <section class="panel export-card">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Exports</p>
+          <h2>Deliverables</h2>
+          <p class="muted">Download reviewed structured data as JSON or CSV.</p>
+        </div>
+      </div>
+      <div class="export-actions" aria-label="Create document exports">
+        <form method="post" action="{% url 'document-export-create' workspace.slug document.pk 'json' %}">
+          {% csrf_token %}
+          <button type="submit">Export JSON</button>
+        </form>
+        <form method="post" action="{% url 'document-export-create' workspace.slug document.pk 'csv' %}">
+          {% csrf_token %}
+          <button class="button-secondary" type="submit">Export CSV</button>
+        </form>
+      </div>
+
+      {% if export_records %}
+        <div class="export-list">
+          {% for export in export_records %}
+            <div class="export-row">
+              <span>
+                <span class="export-name">{{ export.get_format_display }}</span>
+                <span class="export-meta">{{ export.field_count }} reviewed field{{ export.field_count|pluralize }}</span>
+              </span>
+              <a class="download-link" href="{% url 'export-download' workspace.slug export.pk %}">Download</a>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="empty-state">
+          <span class="empty-icon">EX</span>
+          <h3>No exports created yet</h3>
+          <p class="muted">Create a JSON or CSV export after reviewing the extracted fields.</p>
+        </div>
+      {% endif %}
+    </section>
+  </div>
+
+  <section class="panel">
+    <p class="eyebrow">Status timeline</p>
+    <h2>Processing state</h2>
+    <div class="definition-list">
+      <div class="definition-row"><span>Status</span><strong>{{ document.get_status_display }}</strong></div>
+      {% if document.processing_started_at %}
+        <div class="definition-row"><span>Started</span><strong>{{ document.processing_started_at|date:"Y-m-d H:i:s" }}</strong></div>
+      {% endif %}
+      {% if document.processing_completed_at %}
+        <div class="definition-row"><span>Completed</span><strong>{{ document.processing_completed_at|date:"Y-m-d H:i:s" }}</strong></div>
+      {% endif %}
+      {% if document.error_message %}
+        <div class="definition-row"><span>Error</span><strong>{{ document.error_message }}</strong></div>
+      {% endif %}
+    </div>
+  </section>
+</div>
+{% endblock %}

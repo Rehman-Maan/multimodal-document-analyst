@@ -1,0 +1,21 @@
+[
+  {
+    "id": "receipt_001",
+    "file": "samples/receipt_001.png",
+    "document_type": "receipt",
+    "text": "Example Market\nDate 2026-01-12\nTotal 42.18",
+    "schema": {
+      "fields": [
+        {"name": "vendor_name", "type": "string", "required": true},
+        {"name": "transaction_date", "type": "date", "required": false},
+        {"name": "total_amount", "type": "decimal", "required": true}
+      ]
+    },
+    "expected_fields": {
+      "vendor_name": "Example Market",
+      "transaction_date": "2026-01-12",
+      "total_amount": "42.18"
+    },
+    "critical_fields": ["vendor_name", "total_amount"]
+  }
+]

@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Evaluation Reports{% endblock %}
+
+{% block content %}
+<div class="page-shell">
+  <section class="page-header">
+    <div>
+      <p class="eyebrow">Quality measurement</p>
+      <h1>Evaluation reports</h1>
+      <p class="muted">{{ workspace.name }} - score extraction quality against synthetic gold datasets.</p>
+    </div>
+    <div class="action-row">
+      <form method="post" action="{% url 'evaluation-run-create' workspace.slug %}">
+        {% csrf_token %}
+        <button type="submit">Run sample eval</button>
+      </form>
+      <a class="pill-link" href="{% url 'workspace-dashboard' workspace.slug %}">Dashboard</a>
+    </div>
+  </section>
+
+  <section class="surface">
+    {% if evaluation_runs %}
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Dataset</th>
+              <th>Items</th>
+              <th>F1</th>
+              <th>Exact match</th>
+              <th>Created</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for run in evaluation_runs %}
+              <tr>
+                <td><a href="{% url 'evaluation-detail' workspace.slug run.pk %}">{{ run.dataset_name }}</a></td>
+                <td>{{ run.total_items }}</td>
+                <td><span class="badge badge-ok">{{ run.metrics.field_f1|floatformat:2 }}</span></td>
+                <td>{{ run.metrics.field_exact_match|floatformat:2 }}</td>
+                <td>{{ run.created_at|date:"Y-m-d H:i" }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="empty-state">
+        <span class="empty-icon">%</span>
+        <h2>No evaluation reports yet</h2>
+        <p class="muted">Run a sample eval to create your first quality report.</p>
+      </div>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

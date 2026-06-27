@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}Create Account{% endblock %}
+
+{% block content %}
+<div class="auth-shell">
+  <section class="auth-hero">
+    <div>
+      <p class="eyebrow">Start clean</p>
+      <h1>Create account</h1>
+      <p class="muted">Create a workspace identity for reviewing documents, validating extracted fields, and keeping exports traceable.</p>
+      <div class="auth-benefits">
+        <div class="auth-benefit"><span class="badge badge-ok">Review</span><span>Approve or correct uncertain document fields.</span></div>
+        <div class="auth-benefit"><span class="badge">Chat</span><span>Ask cited questions against processed document pages.</span></div>
+        <div class="auth-benefit"><span class="badge badge-warn">Audit</span><span>Keep export and evaluation activity tied to signed-in users.</span></div>
+      </div>
+    </div>
+
+    <div class="auth-panel no-margin">
+      <h2>Set up access</h2>
+      <form method="post" class="form-stack">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        <label>
+          Username
+          {{ form.username }}
+          {{ form.username.errors }}
+        </label>
+        <label>
+          Password
+          {{ form.password1 }}
+          {{ form.password1.errors }}
+        </label>
+        <label>
+          Confirm password
+          {{ form.password2 }}
+          {{ form.password2.errors }}
+        </label>
+        <button type="submit">Create account</button>
+      </form>
+      <p class="muted stack-top">Already have an account? <a href="{% url 'login' %}">Sign in</a>.</p>
+    </div>
+  </section>
+</div>
+{% endblock %}

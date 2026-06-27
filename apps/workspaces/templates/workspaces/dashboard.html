@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}{{ workspace.name }} Dashboard{% endblock %}
+
+{% block content %}
+<div class="page-shell">
+  <section class="dashboard-hero">
+    <div class="hero-copy">
+      <p class="eyebrow">Workspace Command Center</p>
+      <h1>{{ workspace.name }}</h1>
+      <p class="muted">Signed in as {{ request.user.username }} with {{ membership.get_role_display }} access. Upload, extract, review, chat, export, and evaluate documents from one focused workspace.</p>
+    </div>
+    <div class="hero-actions" aria-label="Workspace actions">
+      <a class="button-link" href="{% url 'document-upload' workspace.slug %}">Upload document</a>
+      <a class="pill-link" href="{% url 'document-list' workspace.slug %}">Document library</a>
+      {% if membership.can_review_documents %}
+        <a class="pill-link" href="{% url 'review-task-list' workspace.slug %}">Review queue</a>
+      {% endif %}
+      <a class="pill-link" href="{% url 'export-history' workspace.slug %}">Exports</a>
+      {% if membership.can_manage_workspace %}
+        <a class="pill-link" href="{% url 'evaluation-list' workspace.slug %}">Evaluations</a>
+      {% endif %}
+      <a class="pill-link" href="{% url 'schema-list' workspace.slug %}">Schema library</a>
+    </div>
+  </section>
+
+  <section class="metric-grid" aria-label="Workspace metrics">
+    <article class="metric-card">
+      <span class="metric-label">Documents</span>
+      <strong class="metric-value">{{ stats.documents_uploaded }}</strong>
+      <span class="metric-note">Uploaded into this workspace</span>
+    </article>
+    <article class="metric-card">
+      <span class="metric-label">Review</span>
+      <strong class="metric-value">{{ stats.needs_review }}</strong>
+      <span class="metric-note">Waiting for human validation</span>
+    </article>
+    <article class="metric-card">
+      <span class="metric-label">Approved</span>
+      <strong class="metric-value">{{ stats.approved }}</strong>
+      <span class="metric-note">Ready for downstream export</span>
+    </article>
+    <article class="metric-card">
+      <span class="metric-label">Failures</span>
+      <strong class="metric-value">{{ stats.failed_jobs }}</strong>
+      <span class="metric-note">Jobs needing investigation</span>
+    </article>
+  </section>
+
+  <section class="panel">
+    <div class="toolbar">
+      <div>
+        <p class="eyebrow">Pipeline</p>
+        <h2>Document workflow</h2>
+        <p class="muted">A complete path from raw PDF or image to reviewed, cited, exportable data.</p>
+      </div>
+      <a class="pill-link" href="{% url 'document-upload' workspace.slug %}">Start new upload</a>
+    </div>
+    <div class="workflow-grid">
+      <article class="workflow-step">
+        <strong>1. Upload</strong>
+        <span class="muted">Validate PDFs and images, then queue background processing.</span>
+      </article>
+      <article class="workflow-step">
+        <strong>2. Extract</strong>
+        <span class="muted">Run schema-based field extraction with confidence and source text.</span>
+      </article>
+      <article class="workflow-step">
+        <strong>3. Review</strong>
+        <span class="muted">Correct uncertain fields and approve clean document records.</span>
+      </article>
+      <article class="workflow-step">
+        <strong>4. Deliver</strong>
+        <span class="muted">Ask cited questions, export JSON/CSV, and score quality.</span>
+      </article>
+    </div>
+  </section>
+</div>
+{% endblock %}

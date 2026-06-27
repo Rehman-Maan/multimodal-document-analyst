@@ -1,0 +1,44 @@
+[
+  {
+    "id": "invoice_001",
+    "file": "samples/invoice_001.pdf",
+    "document_type": "invoice",
+    "text": "Acme Supplies\nInvoice INV-1001\nDate 2026-06-27\nTotal 42.50",
+    "schema": {
+      "fields": [
+        {"name": "invoice_number", "type": "string", "required": true},
+        {"name": "vendor_name", "type": "string", "required": true},
+        {"name": "invoice_date", "type": "date", "required": false},
+        {"name": "total_amount", "type": "decimal", "required": true}
+      ]
+    },
+    "expected_fields": {
+      "invoice_number": "INV-1001",
+      "vendor_name": "Acme Supplies",
+      "invoice_date": "2026-06-27",
+      "total_amount": "42.50"
+    },
+    "critical_fields": ["invoice_number", "total_amount"]
+  },
+  {
+    "id": "invoice_002",
+    "file": "samples/invoice_002.pdf",
+    "document_type": "invoice",
+    "text": "Northwind Traders\nInv: NW-204\nInvoice date 2026-05-03\nAmount Due 118.75",
+    "schema": {
+      "fields": [
+        {"name": "invoice_number", "type": "string", "required": true},
+        {"name": "vendor_name", "type": "string", "required": true},
+        {"name": "invoice_date", "type": "date", "required": false},
+        {"name": "total_amount", "type": "decimal", "required": true}
+      ]
+    },
+    "expected_fields": {
+      "invoice_number": "NW-204",
+      "vendor_name": "Northwind Traders",
+      "invoice_date": "2026-05-03",
+      "total_amount": "118.75"
+    },
+    "critical_fields": ["invoice_number", "total_amount"]
+  }
+]

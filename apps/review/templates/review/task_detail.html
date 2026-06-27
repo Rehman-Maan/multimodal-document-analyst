@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}Review Task{% endblock %}
+
+{% block content %}
+<div class="page-shell">
+  <section class="page-header">
+    <div>
+      <p class="eyebrow">Human review</p>
+      <h1>Review task</h1>
+      <p class="muted">{{ task.document.title }} - {{ task.get_status_display }}</p>
+    </div>
+    <div class="action-row">
+      <a class="pill-link" href="{% url 'review-task-list' workspace.slug %}">Review queue</a>
+      <a class="pill-link" href="{% url 'document-detail' workspace.slug task.document.pk %}">Document</a>
+    </div>
+  </section>
+
+  <section class="split-layout">
+    <div class="surface">
+      <div class="section-heading">
+        <div>
+          <h2>Correction workspace</h2>
+          <p class="muted">Confirm the field value and leave a reviewer note if needed.</p>
+        </div>
+        <span class="status-pill">{{ task.get_status_display }}</span>
+      </div>
+
+      <form method="post" action="{% url 'review-task-approve' workspace.slug task.pk %}" class="form-stack">
+        {% csrf_token %}
+        <label>
+          Corrected value
+          <input name="corrected_value" value="{% if task.corrected_value %}{{ task.corrected_value }}{% elif task.field %}{{ task.field.normalized_value }}{% endif %}">
+        </label>
+        <label>
+          Reviewer note
+          <input name="reviewer_note" value="{{ task.reviewer_note }}">
+        </label>
+        <button type="submit">Approve correction</button>
+      </form>
+
+      <div class="danger-zone stack-top">
+        <h3>Reject this task</h3>
+        <p class="muted">Use this when the task is invalid or should not block the document.</p>
+        <form method="post" action="{% url 'review-task-reject' workspace.slug task.pk %}">
+          {% csrf_token %}
+          <button type="submit">Reject task</button>
+        </form>
+      </div>
+    </div>
+
+    <aside class="surface">
+      <h2>Task context</h2>
+      <div class="definition-list">
+        <div class="definition-row"><strong>Reason</strong><span class="muted">{{ task.reason }}</span></div>
+        {% if task.field %}
+          <div class="definition-row"><strong>Field</strong><span class="field-value">{{ task.field.field_name }}</span></div>
+          <div class="definition-row"><strong>Current value</strong><span class="muted">{{ task.field.normalized_value|default:"-" }}</span></div>
+          <div class="definition-row"><strong>Confidence</strong><span class="badge {% if task.field.confidence >= 0.9 %}badge-ok{% elif task.field.confidence < 0.6 %}badge-danger{% else %}badge-warn{% endif %}">{{ task.field.confidence|floatformat:2 }}</span></div>
+        {% endif %}
+      </div>
+      {% if task.field.source_text %}
+        <div class="page-card stack-top">
+          <strong>Source text</strong>
+          <p class="muted flush soft-top">{{ task.field.source_text }}</p>
+        </div>
+      {% endif %}
+    </aside>
+  </section>
+</div>
+{% endblock %}

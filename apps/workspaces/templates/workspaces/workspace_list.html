@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}Workspaces{% endblock %}
+
+{% block content %}
+<div class="page-shell">
+  <section class="page-header">
+    <div>
+      <p class="eyebrow">Operations</p>
+      <h1>Workspaces</h1>
+      <p class="muted">Select a workspace to continue the document workflow.</p>
+    </div>
+    <div class="action-row">
+      <a class="button-link" href="{% url 'workspace-create' %}">New workspace</a>
+    </div>
+  </section>
+
+  {% if workspaces %}
+    <section class="grid">
+      {% for workspace in workspaces %}
+        <article class="surface">
+          <span class="badge">{{ workspace.current_user_role|default:"member" }}</span>
+          <h2 class="card-title-gap">{{ workspace.name }}</h2>
+          <p class="muted">Open the command center for uploads, review, exports, and schema management.</p>
+          <a class="button-link" href="{{ workspace.get_absolute_url }}">Open dashboard</a>
+        </article>
+      {% endfor %}
+    </section>
+  {% else %}
+    <section class="empty-state">
+      <span class="empty-icon">+</span>
+      <h2>No workspaces yet</h2>
+      <p class="muted">Create your first workspace to organize documents, members, and review queues.</p>
+      <a class="button-link" href="{% url 'workspace-create' %}">Create workspace</a>
+    </section>
+  {% endif %}
+</div>
+{% endblock %}

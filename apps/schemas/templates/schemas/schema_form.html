@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}New Schema{% endblock %}
+
+{% block content %}
+<div class="page-shell">
+  <section class="page-header">
+    <div>
+      <p class="eyebrow">Schema library</p>
+      <h1>New extraction schema</h1>
+      <p class="muted">Define the fields that the AI extraction step should return for a document type.</p>
+    </div>
+    <div class="action-row">
+      <a class="pill-link" href="{% url 'schema-list' workspace.slug %}">Schema library</a>
+    </div>
+  </section>
+
+  <section class="split-layout">
+    <div class="surface">
+      <form method="post" class="form-stack">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        <label>Document type {{ form.document_type }} {{ form.document_type.errors }}</label>
+        <label>Name {{ form.name }} {{ form.name.errors }}</label>
+        <label>Version {{ form.version }} {{ form.version.errors }}</label>
+        <label>Active {{ form.active }} {{ form.active.errors }}</label>
+        <label>Schema JSON {{ form.schema_text }} {{ form.schema_text.errors }}</label>
+        <button type="submit">Save schema</button>
+      </form>
+    </div>
+    <aside class="surface">
+      <p class="eyebrow">Tip</p>
+      <h2>Keep schemas precise</h2>
+      <p class="muted">Use field names that match the business output you expect, such as invoice_number, vendor_name, subtotal, tax, and due_date.</p>
+    </aside>
+  </section>
+</div>
+{% endblock %}

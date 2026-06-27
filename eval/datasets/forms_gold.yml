@@ -1,0 +1,19 @@
+[
+  {
+    "id": "form_001",
+    "file": "samples/form_001.png",
+    "document_type": "form",
+    "predicted_document_type": "form",
+    "expected_fields": {
+      "applicant_name": "Jordan Lee",
+      "submission_date": "2026-02-14",
+      "account_number": "AC-7788"
+    },
+    "predicted_fields": {
+      "applicant_name": "Jordan Lee",
+      "submission_date": "2026-02-14",
+      "account_number": "AC-7788"
+    },
+    "critical_fields": ["applicant_name", "account_number"]
+  }
+]

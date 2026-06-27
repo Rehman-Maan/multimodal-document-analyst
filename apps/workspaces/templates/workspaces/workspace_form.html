@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}New Workspace{% endblock %}
+
+{% block content %}
+<div class="page-shell">
+  <section class="page-header">
+    <div>
+      <p class="eyebrow">Setup</p>
+      <h1>New workspace</h1>
+      <p class="muted">Create a focused environment for one client, team, or document process.</p>
+    </div>
+    <div class="action-row">
+      <a class="pill-link" href="{% url 'workspace-home' %}">All workspaces</a>
+    </div>
+  </section>
+
+  <section class="split-layout">
+    <div class="surface">
+      <h2>Workspace details</h2>
+      <form method="post" class="form-stack">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        <label>
+          Workspace name
+          {{ form.name }}
+          {{ form.name.errors }}
+        </label>
+        <button type="submit">Create workspace</button>
+      </form>
+    </div>
+    <aside class="surface">
+      <p class="eyebrow">Includes</p>
+      <div class="definition-list">
+        <div class="definition-row"><strong>Documents</strong><span class="muted">PDF and image uploads</span></div>
+        <div class="definition-row"><strong>Review</strong><span class="muted">Human approval queue</span></div>
+        <div class="definition-row"><strong>Exports</strong><span class="muted">JSON and CSV delivery</span></div>
+      </div>
+    </aside>
+  </section>
+</div>
+{% endblock %}

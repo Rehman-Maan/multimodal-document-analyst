@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Review Queue{% endblock %}
+
+{% block content %}
+<div class="page-shell">
+  <section class="page-header">
+    <div>
+      <p class="eyebrow">Human validation</p>
+      <h1>Review queue</h1>
+      <p class="muted">{{ workspace.name }} - correct uncertain fields and close review work.</p>
+    </div>
+    <a class="pill-link" href="{% url 'workspace-dashboard' workspace.slug %}">Dashboard</a>
+  </section>
+
+  <section class="surface">
+    {% if tasks %}
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Document</th>
+              <th>Field</th>
+              <th>Status</th>
+              <th>Priority</th>
+              <th>Reason</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for task in tasks %}
+              <tr>
+                <td><a href="{{ task.document.get_absolute_url }}">{{ task.document.title }}</a></td>
+                <td>
+                  {% if task.field %}
+                    <a href="{% url 'review-task-detail' workspace.slug task.pk %}">{{ task.field.field_name }}</a>
+                  {% else %}
+                    <a href="{% url 'review-task-detail' workspace.slug task.pk %}">Document review</a>
+                  {% endif %}
+                </td>
+                <td><span class="status-pill">{{ task.get_status_display }}</span></td>
+                <td><span class="badge {% if task.priority == 'high' %}badge-warn{% endif %}">{{ task.get_priority_display }}</span></td>
+                <td>{{ task.reason|truncatechars:100 }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="empty-state">
+        <span class="empty-icon">✓</span>
+        <h2>No review tasks</h2>
+        <p class="muted">Low-confidence fields will appear here after extraction.</p>
+      </div>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

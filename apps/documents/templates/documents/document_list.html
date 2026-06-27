@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}{{ workspace.name }} Documents{% endblock %}
+
+{% block content %}
+<div class="page-shell">
+  <section class="page-header">
+    <div>
+      <p class="eyebrow">Library</p>
+      <h1>Documents</h1>
+      <p class="muted">{{ workspace.name }} - uploaded files, processing state, and document workflow entry points.</p>
+    </div>
+    <div class="action-row">
+      <a class="button-link" href="{% url 'document-upload' workspace.slug %}">Upload document</a>
+      <a class="pill-link" href="{% url 'workspace-dashboard' workspace.slug %}">Dashboard</a>
+    </div>
+  </section>
+
+  {% if documents %}
+    <section class="surface">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Title</th>
+              <th>Type</th>
+              <th>Status</th>
+              <th>Uploaded by</th>
+              <th>Uploaded</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for document in documents %}
+              <tr>
+                <td><a href="{{ document.get_absolute_url }}">{{ document.title }}</a></td>
+                <td><span class="badge">{{ document.file_type }}</span></td>
+                <td><span class="status-pill">{{ document.get_status_display }}</span></td>
+                <td>{{ document.uploaded_by }}</td>
+                <td>{{ document.created_at|date:"Y-m-d H:i" }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  {% else %}
+    <section class="empty-state">
+      <span class="empty-icon">+</span>
+      <h2>No documents yet</h2>
+      <p class="muted">Upload a PDF, PNG, JPG, or TIFF file to start the document workflow.</p>
+      <a class="button-link" href="{% url 'document-upload' workspace.slug %}">Upload document</a>
+    </section>
+  {% endif %}
+</div>
+{% endblock %}

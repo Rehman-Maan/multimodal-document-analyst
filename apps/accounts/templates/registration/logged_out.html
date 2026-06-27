@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block title %}Signed Out{% endblock %}
+
+{% block content %}
+<section class="auth-panel">
+  <p class="eyebrow">Session closed</p>
+  <h1>Signed out</h1>
+  <p class="muted">You have been signed out of Multimodal Document Analyst.</p>
+  <a class="button-link" href="{% url 'login' %}">Sign in again</a>
+</section>
+{% endblock %}

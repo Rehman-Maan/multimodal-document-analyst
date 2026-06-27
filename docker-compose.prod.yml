@@ -1,0 +1,76 @@
+services:
+  web:
+    image: multimodal-document-analyst:prod
+    build:
+      context: .
+      dockerfile: infra/docker/Dockerfile
+    command: gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 3
+    env_file:
+      - .env
+    environment:
+      DJANGO_DEBUG: "False"
+    volumes:
+      - media_data:/app/media
+      - static_data:/app/staticfiles
+    ports:
+      - "${WEB_HOST_PORT:-8000}:8000"
+    depends_on:
+      - postgres
+      - redis
+    restart: unless-stopped
+
+  worker:
+    image: multimodal-document-analyst:prod
+    build:
+      context: .
+      dockerfile: infra/docker/Dockerfile
+    command: celery -A config worker --loglevel=info
+    env_file:
+      - .env
+    environment:
+      DJANGO_DEBUG: "False"
+    volumes:
+      - media_data:/app/media
+    depends_on:
+      - postgres
+      - redis
+    restart: unless-stopped
+
+  beat:
+    image: multimodal-document-analyst:prod
+    build:
+      context: .
+      dockerfile: infra/docker/Dockerfile
+    command: celery -A config beat --loglevel=info
+    env_file:
+      - .env
+    environment:
+      DJANGO_DEBUG: "False"
+    volumes:
+      - media_data:/app/media
+    depends_on:
+      - postgres
+      - redis
+    restart: unless-stopped
+
+  postgres:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_DB: multimodal_document_analyst
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:
+  media_data:
+  static_data:
