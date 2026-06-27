@@ -21,7 +21,7 @@ jobs:
       OPENAI_EMBEDDING_MODEL: text-embedding-3-small
       OPENAI_CHAT_MODEL: gpt-4.1-mini
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - uses: actions/setup-python@v6
         with:
@@ -55,7 +55,7 @@ jobs:
       contents: read
       security-events: write
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - uses: docker/setup-buildx-action@v4
 
