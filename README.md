@@ -6,14 +6,6 @@ Multimodal Document Analyst is a Django document AI system that extracts structu
 
 Teams still process invoices, receipts, forms, scans, and compliance documents manually. This project is being built as a production-style workflow for turning messy documents into validated structured data with a human review loop.
 
-## Demo
-
-Recording script and storyboard are ready:
-
-- [Demo script](docs/demo_script.md)
-- [LinkedIn caption](docs/video/linkedin_post_caption.md)
-- [Storyboard](docs/video/storyboard.md)
-
 ## Screenshots
 
 ### Workspace Dashboard
